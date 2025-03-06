@@ -1,0 +1,165 @@
+/* Login Character and Form Styles */
+.svgContainer {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 1em;
+  border-radius: 50%;
+  pointer-events: none;
+  background-color: #a9ddf3;
+}
+
+.svgContainer div {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  padding-bottom: 100%;
+}
+
+.mySVG {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.inputGroup {
+  margin: 0 0 2em;
+  padding: 0;
+  position: relative;
+}
+
+.inputGroup:last-of-type {
+  margin-bottom: 0;
+}
+
+.helper {
+  position: absolute;
+  z-index: 1;
+  font-family: inherit;
+}
+
+.helper1 {
+  top: 0;
+  left: 1em;
+  transform: translate(0, 2.2em) scale(1);
+  transform-origin: 0 0;
+  color: #8b9baa;
+  font-size: 1.55em;
+  font-weight: 400;
+  opacity: 0.65;
+  pointer-events: none;
+  transition: transform 0.2s ease-out, opacity 0.2s linear;
+}
+
+.inputGroup.focusWithText .helper {
+  transform: translate(0, 1.5em) scale(0.6);
+  opacity: 1;
+}
+
+#showPasswordToggle {
+  display: block;
+  padding: 0 0 0 1.45em;
+  position: absolute;
+  top: 0.25em;
+  right: 0;
+  font-size: 1em;
+}
+
+.indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 0.85em;
+  width: 0.85em;
+  background-color: #f3fafd;
+  border: solid 2px #217093;
+  border-radius: 3px;
+  transition: all 0.2s ease-out;
+}
+
+.indicator:after {
+  content: "";
+  position: absolute;
+  left: 0.25em;
+  top: 0.025em;
+  width: 0.2em;
+  height: 0.5em;
+  border: solid #217093;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+  visibility: hidden;
+  transition: all 0.2s ease-out;
+}
+
+#showPasswordCheck:checked ~ .indicator:after {
+  visibility: visible;
+}
+
+#showPasswordCheck:focus ~ .indicator,
+#showPasswordCheck:hover ~ .indicator {
+  border-color: #4eb8dd;
+}
+
+/* Dark theme overrides */
+.dark .indicator {
+  background-color: #1f2937;
+  border-color: #4eb8dd;
+}
+
+.dark .indicator:after {
+  border-color: #4eb8dd;
+}
+
+.dark .helper1 {
+  color: #9ca3af;
+}
+
+.dark .inputGroup.focusWithText .helper {
+  color: #60a5fa;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Input focus styles */
+.inputGroup input:focus {
+  outline: none;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  border: solid 2px #4eb8dd;
+}
+
+/* Password requirements animation */
+.requirement-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.requirement-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.requirement-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.requirement-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
+} 
