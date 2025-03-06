@@ -18,15 +18,6 @@ const nextConfig = {
       config.devtool = 'source-map';
     }
 
-    // Add cache configuration
-    config.cache = {
-      type: 'filesystem',
-      buildDependencies: {
-        config: [__filename],
-      },
-      cacheDirectory: '.next/cache/webpack',
-    };
-
     return config;
   },
   experimental: {
@@ -34,15 +25,12 @@ const nextConfig = {
     optimizeCss: true,
     optimizePackageImports: ['@stripe/stripe-js', 'framer-motion', 'gsap'],
   },
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 2,
+  // Cloudflare Pages specific settings
+  output: 'export',
+  images: {
+    unoptimized: true,
   },
-  compiler: {
-    removeConsole: false,
-  },
-  // Add output configuration for better caching
-  output: 'standalone',
+  // Disable features not needed for static export
   poweredByHeader: false,
   generateEtags: false,
 }
