@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { isServer }) => {
     config.infrastructureLogging = {
       level: 'verbose',
     };
@@ -14,7 +14,7 @@ const nextConfig = {
       tls: false,
     };
 
-    if (!dev && !isServer) {
+    if (!isServer && !process.env.NODE_ENV === 'development') {
       config.devtool = 'source-map';
     }
 
