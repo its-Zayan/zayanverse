@@ -18,10 +18,21 @@ const nextConfig = {
       config.devtool = 'source-map';
     }
 
+    // Add cache configuration
+    config.cache = {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+      cacheDirectory: '.next/cache/webpack',
+    };
+
     return config;
   },
   experimental: {
     appDir: true,
+    optimizeCss: true,
+    optimizePackageImports: ['@stripe/stripe-js', 'framer-motion', 'gsap'],
   },
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
@@ -30,6 +41,10 @@ const nextConfig = {
   compiler: {
     removeConsole: false,
   },
+  // Add output configuration for better caching
+  output: 'standalone',
+  poweredByHeader: false,
+  generateEtags: false,
 }
 
 module.exports = nextConfig 
