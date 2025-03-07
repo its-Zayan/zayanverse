@@ -25,6 +25,21 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                   Projects
                 </Link>
               </li>
+              <li>
+                <Link href="/notes" className="text-white hover:text-gray-300 whitespace-nowrap">
+                  Notes/E-Books
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="text-white hover:text-gray-300">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link href="/social" className="text-white hover:text-gray-300">
+                  Social
+                </Link>
+              </li>
             </ul>
           </nav>
           <div className="flex-1 flex justify-end">
