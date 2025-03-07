@@ -1,10 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, ShoppingCart, Star, Lock } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
-import { loadStripe } from '@stripe/stripe-js';
 
 interface Project {
   title: string;
@@ -113,59 +112,14 @@ Jarvis is not just another chatbot—it is an intelligent **AI assistant designe
   }
 ];
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
 export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<'payment' | 'confirmation'>('payment');
 
-  const handlePayment = async (project: Project) => {
-    if (!project.price) return;
-    
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: project.price,
-          projectId: project.title,
-        }),
-      });
-
-      const { clientSecret } = await response.json();
-      const stripe = await stripePromise;
-
-      if (!stripe) {
-        throw new Error('Stripe failed to initialize');
-      }
-
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: {
-            number: '4242424242424242', // Test card number
-            exp_month: 12,
-            exp_year: 2024,
-            cvc: '123',
-          },
-        },
-      });
-
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
-
-      // Payment successful
-      alert('Payment successful! Thank you for your purchase.');
-      setSelectedProject(null);
-    } catch (error) {
-      console.error('Payment failed:', error);
-      alert('Payment failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+  const handlePurchase = async (project: Project) => {
+    setSelectedProject(project);
+    setPaymentStep('payment');
   };
 
   // Function to convert markdown to HTML (basic version)
@@ -212,7 +166,7 @@ export default function Projects() {
                 scale: 1.02,
                 transition: { duration: 0.2 }
               }}
-              onClick={() => setSelectedProject(project)}
+              onClick={() => handlePurchase(project)}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="bg-white/5 rounded-xl overflow-hidden border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300 cursor-pointer"
             >
@@ -290,7 +244,7 @@ export default function Projects() {
                             ${selectedProject.price.toFixed(2)}
                           </span>
                           <motion.button
-                            onClick={() => handlePayment(selectedProject)}
+                            onClick={() => handlePurchase(selectedProject)}
                             disabled={isLoading}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
