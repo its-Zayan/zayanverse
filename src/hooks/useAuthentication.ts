@@ -1,20 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { auth, db } from '@/lib/firebase';
+import type { User } from 'firebase/auth';
 import { 
-  User,
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   sendEmailVerification,
-  AuthError
+  AuthErrorCodes,
+  FirebaseError
 } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
-export const useAuthentication = () => {
-  const [error, setError] = useState<string | null>(null);
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+interface AuthError extends FirebaseError {
+  code: string;
+  message: string;
+}
+
+export function useAuthentication() {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    loading: true,
+    error: null,
+  });
   const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setAuthState((prev) => ({
+        ...prev,
+        user,
+        loading: false,
+      }));
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleAuthError = (error: AuthError) => {
     switch (error.code) {
@@ -35,9 +63,19 @@ export const useAuthentication = () => {
 
   const signUp = async (email: string, password: string): Promise<boolean> => {
     try {
-      setError(null);
+      setAuthState((prev) => ({
+        ...prev,
+        loading: true,
+        error: null,
+      }));
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
+      setAuthState((prev) => ({
+        ...prev,
+        user: userCredential.user,
+        loading: false,
+      }));
+
       const userData = {
         email: email,
         createdAt: new Date().toISOString(),
@@ -53,23 +91,40 @@ export const useAuthentication = () => {
       // Sign out after signup to force email verification
       await signOut(auth);
       return true;
-      
     } catch (error: any) {
       console.error('Error signing up:', error);
-      setError(handleAuthError(error));
+      setAuthState((prev) => ({
+        ...prev,
+        error: handleAuthError(error as AuthError),
+        loading: false,
+      }));
       return false;
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
-      setError(null);
+      setAuthState((prev) => ({
+        ...prev,
+        loading: true,
+        error: null,
+      }));
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      
+      setAuthState((prev) => ({
+        ...prev,
+        user: userCredential.user,
+        loading: false,
+      }));
+
       // Check if email is verified
       if (!userCredential.user.emailVerified) {
         await signOut(auth);
-        setError('Please verify your email before signing in. Check your inbox for the verification link.');
+        setAuthState((prev) => ({
+          ...prev,
+          error: 'Please verify your email before signing in. Check your inbox for the verification link.',
+          loading: false,
+        }));
         throw new Error('Email not verified');
       }
 
@@ -77,28 +132,48 @@ export const useAuthentication = () => {
       router.push('/');
     } catch (error: any) {
       console.error('Error signing in:', error);
-      setError(error.message === 'Email not verified' ? 'Please verify your email before signing in. Check your inbox for the verification link.' : handleAuthError(error));
+      setAuthState((prev) => ({
+        ...prev,
+        error: error.message === 'Email not verified' ? 'Please verify your email before signing in. Check your inbox for the verification link.' : handleAuthError(error as AuthError),
+        loading: false,
+      }));
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      setError(null);
+      setAuthState((prev) => ({
+        ...prev,
+        loading: true,
+        error: null,
+      }));
+
       await signOut(auth);
       Cookies.remove('auth');
       router.push('/auth');
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null,
+      });
     } catch (error: any) {
       console.error('Error logging out:', error);
-      setError('Error logging out. Please try again.');
+      setAuthState((prev) => ({
+        ...prev,
+        error: 'Error logging out. Please try again.',
+        loading: false,
+      }));
       throw error;
     }
   };
 
   return {
-    error,
+    user: authState.user,
+    loading: authState.loading,
+    error: authState.error,
     signUp,
     signIn,
     logout,
   };
-}; 
+} 
